@@ -1,3 +1,54 @@
+Casos de Uso: AI-SDLC Compass
+
+
+1. Atores
+Ator	Tipo	Descrição
+Representante da Equipa	                Primário	            Delivery Manager, Tech Lead ou outro elemento que usa a ferramenta para obter o diagnóstico
+Avaliador / Equipa de Desenvolvimento	Primário	            Estudantes/docentes que testam e afinam a qualidade dos diagnósticos
+Fornecedor de Repositório	            Secundário (externo)	GitHub, GitLab ou upload local (ZIP)
+Serviço de GenAI na Cloud	            Secundário (externo)	Motor que gera o diagnóstico
+Sistema (Scanner)	                    Interno	                Módulo de análise do repositório
+
+
+
+2. Visão geral
+ID	    Caso de uso	                                Módulo
+UC01	Ligar repositório de código	                Repositório
+UC02	Validar elegibilidade do repositório	    Repositório
+UC03	Executar scan do repositório	            Repositório
+UC04	Detetar stack tecnológica	                Repositório
+UC05	Analisar estrutura e complexidade	        Repositório
+UC06	Consultar e corrigir sinais extraídos	    Repositório
+UC07	Declarar metodologia de entrega	            Contexto da equipa
+UC08	Declarar dimensão da equipa	                Contexto da equipa
+UC09	Declarar pain points do SDLC	            Contexto da equipa
+UC10	Declarar nível de maturidade em IA	        Contexto da equipa
+UC11	Validar e guardar inputs (incl. rascunho)	Contexto da equipa
+UC12	Construir perfil contextual	                Geração
+UC13	Gerar diagnóstico por fase do SDLC	        Geração
+UC14	Priorizar oportunidades de IA	            Geração
+UC15	Justificar recomendações	                Geração
+UC16	Regenerar diagnóstico	                    Geração
+UC17	Pré-visualizar relatório	                Relatório
+UC18	Exportar relatório em PDF	                Relatório
+UC19	Incluir limitações de âmbito no relatório	Relatório
+UC20	Consultar limitações e roadmap enterprise	Âmbito
+UC21	Tratar repositório fora do âmbito	        Âmbito
+UC22	Executar testes com perfis de teste	        Avaliação
+UC23	Comparar consistência entre execuções	    Avaliação
+UC24	Gerir templates de prompts	                Avaliação
+UC25	Versionar prompts e resultados	            Avaliação
+UC26	Avaliar qualidade de um diagnóstico	        Avaliação
+UC27	Consultar histórico de avaliações	        Transversal
+UC28	Configurar integração com serviço de GenAI	Transversal
+UC29	Tratar falhas e erros	                    Transversal
+UC30	Gerir privacidade e dados do código	        Transversal
+
+
+
+3. Casos de uso detalhados (fluxo principal)
+
+
 UC01: Ligar repositório de código
     Ator: Representante da Equipa
     Pré-condição: Utilizador tem acesso ao repositório (URL público, token ou ficheiro ZIP).
@@ -45,7 +96,7 @@ UC04: Detetar stack tecnológica
         Alternativo: Sem ficheiros de dependências → deduz pela extensão e imports, com indicador de baixa confiança.
 
 
-UC05: Analisar estrutura e complexidade
+UC05: Analisar estrutura e complexidade  ##################### THIS ONE IS UP TO DEBATE GOTTA CHECK WITH ALL
     Fluxo principal:
         Calcula número de ficheiros, linhas de código e módulos/pacotes.
         Calcula indicadores de complexidade (ex.: complexidade ciclomática aproximada, tamanho médio de funções).
@@ -75,7 +126,7 @@ UC07 a UC10: Inputs da equipa (auto-declarados)
         Sistema valida os campos.
     Alternativos:
         A1. Campo obrigatório vazio → mensagem de validação.
-        A2. Texto livre excessivo ou com conteúdo sensível → aviso/truncagem.
+        A2. Texto livre excessivo ou com conteúdo sensível → aviso/truncagem.   ##################### THIS ONE IS UP TO DEBATE GOTTA CHECK WITH ALL
 
 
 UC11: Validar e guardar inputs
@@ -131,6 +182,7 @@ UC18: Exportar relatório em PDF
         Gera o PDF e disponibiliza o download.
     Alternativo: Falha na geração → erro e nova tentativa.
 
+############################################### A PARTIR DAQUI AINDA È UM TRABALHO EM PROGRESSO ######################################################################
 
 UC19: Incluir limitações de âmbito no relatório
     Fluxo principal: Sistema acrescenta automaticamente a secção de âmbito (≈50 ficheiros, 3 linguagens, inputs auto-declarados, natureza de PoC) e o caminho para escala enterprise.
