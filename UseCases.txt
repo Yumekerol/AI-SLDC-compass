@@ -1,0 +1,190 @@
+UC01: Ligar repositório de código
+    Ator: Representante da Equipa
+    Pré-condição: Utilizador tem acesso ao repositório (URL público, token ou ficheiro ZIP).
+    Fluxo principal:
+        Utilizador escolhe a origem (URL Git ou upload de ZIP).
+        Introduz o URL/token ou seleciona o ficheiro.
+        Sistema obtém o conteúdo para uma área temporária.
+        Sistema aciona UC02.
+    Fluxos alternativos:
+        A1. URL inválido ou inacessível → mensagem de erro e pedido de nova tentativa.
+        A2. Repositório privado sem token → sistema pede credenciais.
+        A3. ZIP corrompido ou ilegível → erro e novo upload.
+    Pós-condição: Código disponível temporariamente para análise.
+
+
+UC02: Validar elegibilidade do repositório
+    Ator: Sistema
+    Fluxo principal:
+        Conta os ficheiros de código (limite ≈ 50).
+        Identifica as linguagens presentes (Python, JavaScript, Java).
+        Ignora ficheiros irrelevantes (node_modules, .git, binários, ficheiros gerados).
+        Se cumprir os critérios, segue para UC03.
+    Fluxos alternativos:
+        A1. Excede ~50 ficheiros → aciona UC21 (aviso, scan parcial ou cancelamento).
+        A2. Linguagem não suportada → aciona UC21.
+        A3. Repositório vazio → erro informativo.
+
+
+UC03: Executar scan do repositório
+    Ator: Sistema (Scanner)
+    Fluxo principal:
+        Percorre a árvore de ficheiros.
+        Aciona UC04 e UC05.
+        Consolida os sinais num objeto estruturado (JSON).
+        Apresenta o progresso ao utilizador.
+    Alternativo: Ficheiro ilegível ou com encoding inválido → é registado como aviso e o scan continua.
+    Pós-condição: Conjunto de sinais do repositório criado.
+
+
+UC04: Detetar stack tecnológica
+    Fluxo principal:
+        Analisa ficheiros de dependências (requirements.txt, pyproject.toml, package.json, pom.xml, build.gradle).
+        Identifica linguagens, frameworks, bibliotecas de teste e ferramentas de build.
+        Deteta presença de CI/CD (.github/workflows, Jenkinsfile, Dockerfile).
+        Alternativo: Sem ficheiros de dependências → deduz pela extensão e imports, com indicador de baixa confiança.
+
+
+UC05: Analisar estrutura e complexidade
+    Fluxo principal:
+        Calcula número de ficheiros, linhas de código e módulos/pacotes.
+        Calcula indicadores de complexidade (ex.: complexidade ciclomática aproximada, tamanho médio de funções).
+        Estima cobertura de testes (rácio ficheiros de teste / código, sem executar os testes).
+        Verifica documentação (README, comentários, docstrings).
+
+
+UC06: Consultar e corrigir sinais extraídos
+    Ator: Representante da Equipa
+    Fluxo principal:
+        Sistema mostra o resumo do scan.
+        Utilizador revê os sinais.
+        Utilizador corrige ou adiciona informação (ex.: framework não detetada).
+        Sistema atualiza o perfil.
+    Alternativo: Utilizador aceita sem alterações.
+
+
+UC07 a UC10: Inputs da equipa (auto-declarados)
+    Ator: Representante da Equipa
+    Fluxo principal (comum):
+        Sistema apresenta o formulário estruturado.
+        Utilizador preenche:
+            UC07: metodologia (Scrum, Kanban, Waterfall; opcionalmente híbrida/outra).
+            UC08: dimensão da equipa (número de elementos e, opcionalmente, papéis).
+            UC09: pain points (seleção múltipla por fase do SDLC + texto livre).
+            UC10: maturidade em IA (ex.: nenhuma, exploratória, adoção parcial, sistemática) e ferramentas já usadas.
+        Sistema valida os campos.
+    Alternativos:
+        A1. Campo obrigatório vazio → mensagem de validação.
+        A2. Texto livre excessivo ou com conteúdo sensível → aviso/truncagem.
+
+
+UC11: Validar e guardar inputs
+    Fluxo principal: Sistema valida todos os campos, mostra um resumo e o utilizador confirma.
+    Alternativos: Guardar como rascunho e retomar mais tarde; editar antes de confirmar.
+
+
+UC12: Construir perfil contextual
+    Ator: Sistema
+    Pré-condição: UC03 e UC11 concluídos.
+    Fluxo principal:
+        Funde sinais do repositório e inputs da equipa.
+        Normaliza os dados num perfil estruturado.
+        Identifica lacunas ou contradições (ex.: equipa declara "Scrum" mas não há sinais de CI/CD).
+        Pós-condição: Perfil pronto para o prompt.
+
+
+UC13: Gerar diagnóstico por fase do SDLC
+    Atores: Sistema, Serviço de GenAI
+    Fluxo principal:
+        Sistema monta o prompt a partir do template e do perfil.
+        Envia o pedido ao serviço de GenAI.
+        Recebe a resposta estruturada.
+        Valida o formato (6 fases: requisitos, design, desenvolvimento, testes, deployment, monitorização).
+        Guarda o diagnóstico.
+    Alternativos:
+        A1. Resposta fora do formato esperado → novo pedido automático (limite de tentativas).
+        A2. Timeout ou erro do serviço → aciona UC29.
+        A3. Fase sem oportunidades relevantes → indica "sem recomendação prioritária" com justificação.
+
+
+UC14: Priorizar oportunidades de IA
+    Fluxo principal: Cada recomendação recebe impacto esperado, esforço de adoção e prioridade (ex.: alta/média/baixa), e o sistema apresenta os "quick wins".
+
+
+UC15: Justificar recomendações
+    Fluxo principal: Cada recomendação inclui o raciocínio (o sinal do repositório ou do input que a motivou), práticas concretas e exemplos de ferramentas/abordagens.
+
+
+UC16: Regenerar diagnóstico
+    Fluxo principal: Utilizador altera inputs ou pede nova geração, e o sistema guarda a nova versão sem apagar a anterior.
+
+
+UC17: Pré-visualizar relatório
+    Fluxo principal: Sistema apresenta o relatório estruturado por fase, com o perfil de contexto no início e as limitações no fim.
+    Alternativo: Utilizador pede ajustes (UC16) antes de exportar.
+
+
+UC18: Exportar relatório em PDF
+    Fluxo principal:
+        Utilizador seleciona "Exportar".
+        Sistema aplica o template profissional (capa, sumário executivo, secções por fase, recomendações, anexos).
+        Gera o PDF e disponibiliza o download.
+    Alternativo: Falha na geração → erro e nova tentativa.
+
+
+UC19: Incluir limitações de âmbito no relatório
+    Fluxo principal: Sistema acrescenta automaticamente a secção de âmbito (≈50 ficheiros, 3 linguagens, inputs auto-declarados, natureza de PoC) e o caminho para escala enterprise.
+
+
+UC20: Consultar limitações e roadmap enterprise
+    Fluxo principal: Utilizador abre a página de âmbito e vê as limitações e a evolução prevista (integração com Jira/Azure DevOps, mais linguagens, repositórios maiores, etc.).
+
+
+UC21: Tratar repositório fora do âmbito
+    Fluxo principal: Sistema explica o motivo, oferece alternativas (analisar subconjunto de ficheiros, continuar com aviso de baixa confiança ou cancelar) e regista a decisão.
+
+
+UC22: Executar testes com perfis de teste
+    Ator: Avaliador
+    Fluxo principal:
+        Seleciona repositórios de teste (diferentes tipos e linguagens) e perfis de equipa.
+        Executa o pipeline completo para cada combinação.
+        Sistema guarda os diagnósticos e metadados (versão do prompt, modelo, data).
+
+
+UC23: Comparar consistência entre execuções
+    Fluxo principal: Avaliador corre o mesmo input várias vezes e compara as saídas (estrutura, recomendações repetidas, variabilidade).
+
+
+UC24: Gerir templates de prompts
+    Fluxo principal: Avaliador cria, edita e ativa templates de prompts e de relatório.
+
+
+UC25: Versionar prompts e resultados
+    Fluxo principal: Cada alteração gera uma versão, associada aos diagnósticos produzidos, permitindo comparação antes/depois.
+
+
+UC26: Avaliar qualidade de um diagnóstico
+    Fluxo principal: Avaliador classifica o diagnóstico segundo critérios (relevância, especificidade, coerência com o contexto, acionabilidade, ausência de alucinações) e regista observações.
+
+
+UC27: Consultar histórico de avaliações
+    Fluxo principal: Utilizador vê a lista de avaliações anteriores, reabre relatórios e exporta novamente.
+
+
+UC28: Configurar integração com serviço de GenAI
+    Fluxo principal: Define fornecedor, modelo, chave de API e parâmetros (temperatura, limites de tokens), e testa a ligação.
+    Alternativo: Chave inválida → erro claro.
+
+
+UC29: Tratar falhas e erros
+    Cenários cobertos: serviço de GenAI indisponível, limite de quota excedido, resposta incompleta ou mal formatada, falha de rede ao obter o repositório, erro na geração do PDF.
+    Comportamento: mensagem compreensível, retentativas controladas, preservação dos dados já introduzidos.
+
+
+UC30: Gerir privacidade e dados do código
+    Fluxo principal:
+        Sistema informa o utilizador sobre que dados são enviados ao serviço de GenAI (sinais/excertos, não o código completo, se aplicável).
+        Pede consentimento explícito.
+        Elimina o código temporário após o scan.
+    Alternativo: Utilizador recusa → o processo não avança.
