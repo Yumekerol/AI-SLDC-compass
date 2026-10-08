@@ -14,20 +14,14 @@ Sistema (Scanner)	                    Interno	                Módulo de anális
 2. Visão geral
 ID	    Caso de uso	                                Módulo
 UC01	Ligar repositório de código	                Repositório
-UC02	Validar elegibilidade do repositório	    Repositório
-UC03	Executar scan do repositório	            Repositório
-UC04	Detetar stack tecnológica	                Repositório
-UC05	Analisar estrutura e complexidade	        Repositório
+UC02	Analisar repositório	    Repositório
 UC06	Consultar e corrigir sinais extraídos	    Repositório
 UC07	Declarar metodologia de entrega	            Contexto da equipa
 UC08	Declarar dimensão da equipa	                Contexto da equipa
 UC09	Declarar pain points do SDLC	            Contexto da equipa
 UC10	Declarar nível de maturidade em IA	        Contexto da equipa
 UC11	Validar e guardar inputs (incl. rascunho)	Contexto da equipa
-UC12	Construir perfil contextual	                Geração
 UC13	Gerar diagnóstico por fase do SDLC	        Geração
-UC14	Priorizar oportunidades de IA	            Geração
-UC15	Justificar recomendações	                Geração
 UC16	Regenerar diagnóstico	                    Geração
 UC17	Pré-visualizar relatório	                Relatório
 UC18	Exportar relatório em PDF	                Relatório
@@ -64,44 +58,28 @@ UC01: Ligar repositório de código
     Pós-condição: Código disponível temporariamente para análise.
 
 
-UC02: Validar elegibilidade do repositório
-    Ator: Sistema
+UC02: Analisar repositório
+    Ator: Representante da Equipa
     Fluxo principal:
         Conta os ficheiros de código (limite ≈ 50).
         Identifica as linguagens presentes (Python, JavaScript, Java).
         Ignora ficheiros irrelevantes (node_modules, .git, binários, ficheiros gerados).
-        Se cumprir os critérios, segue para UC03.
+        Analisa ficheiros de dependências (requirements.txt, pyproject.toml, package.json, pom.xml, build.gradle).
+        Identifica linguagens, frameworks, bibliotecas de teste e ferramentas de build.
+        Deteta presença de CI/CD (.github/workflows, Jenkinsfile, Dockerfile).
+        Calcula número de ficheiros, linhas de código e módulos/pacotes.  ##################### THIS ONE IS UP TO DEBATE GOTTA CHECK WITH ALL
+        Calcula indicadores de complexidade (ex.: complexidade ciclomática aproximada, tamanho médio de funções).
+        Estima cobertura de testes (rácio ficheiros de teste / código, sem executar os testes).
+        Verifica documentação (README, comentários, docstrings).
+        Consolida os sinais num objeto estruturado (JSON).
+        Apresenta o progresso ao utilizador.
     Fluxos alternativos:
         A1. Excede ~50 ficheiros → aciona UC21 (aviso, scan parcial ou cancelamento).
         A2. Linguagem não suportada → aciona UC21.
         A3. Repositório vazio → erro informativo.
-
-
-UC03: Executar scan do repositório
-    Ator: Sistema (Scanner)
-    Fluxo principal:
-        Percorre a árvore de ficheiros.
-        Aciona UC04 e UC05.
-        Consolida os sinais num objeto estruturado (JSON).
-        Apresenta o progresso ao utilizador.
-    Alternativo: Ficheiro ilegível ou com encoding inválido → é registado como aviso e o scan continua.
+        A4. Ficheiro ilegível ou com encoding inválido → é registado como aviso e o scan continua.
+        A5. Sem ficheiros de dependências → deduz pela extensão e imports, com indicador de baixa confiança.
     Pós-condição: Conjunto de sinais do repositório criado.
-
-
-UC04: Detetar stack tecnológica
-    Fluxo principal:
-        Analisa ficheiros de dependências (requirements.txt, pyproject.toml, package.json, pom.xml, build.gradle).
-        Identifica linguagens, frameworks, bibliotecas de teste e ferramentas de build.
-        Deteta presença de CI/CD (.github/workflows, Jenkinsfile, Dockerfile).
-        Alternativo: Sem ficheiros de dependências → deduz pela extensão e imports, com indicador de baixa confiança.
-
-
-UC05: Analisar estrutura e complexidade  ##################### THIS ONE IS UP TO DEBATE GOTTA CHECK WITH ALL
-    Fluxo principal:
-        Calcula número de ficheiros, linhas de código e módulos/pacotes.
-        Calcula indicadores de complexidade (ex.: complexidade ciclomática aproximada, tamanho médio de funções).
-        Estima cobertura de testes (rácio ficheiros de teste / código, sem executar os testes).
-        Verifica documentação (README, comentários, docstrings).
 
 
 UC06: Consultar e corrigir sinais extraídos
@@ -134,36 +112,25 @@ UC11: Validar e guardar inputs
     Alternativos: Guardar como rascunho e retomar mais tarde; editar antes de confirmar.
 
 
-UC12: Construir perfil contextual
-    Ator: Sistema
-    Pré-condição: UC03 e UC11 concluídos.
+UC13: Gerar diagnóstico por fase do SDLC
+    Atores: Representante da Equipa, Serviço de GenAI
+    Pré-condição: UC02 e UC11 concluídos.
     Fluxo principal:
         Funde sinais do repositório e inputs da equipa.
         Normaliza os dados num perfil estruturado.
         Identifica lacunas ou contradições (ex.: equipa declara "Scrum" mas não há sinais de CI/CD).
-        Pós-condição: Perfil pronto para o prompt.
-
-
-UC13: Gerar diagnóstico por fase do SDLC
-    Atores: Sistema, Serviço de GenAI
-    Fluxo principal:
         Sistema monta o prompt a partir do template e do perfil.
         Envia o pedido ao serviço de GenAI.
         Recebe a resposta estruturada.
         Valida o formato (6 fases: requisitos, design, desenvolvimento, testes, deployment, monitorização).
+        Atribui a cada recomendação impacto esperado, esforço de adoção e prioridade (ex.: alta/média/baixa), e apresenta os "quick wins".
+        Associa a cada recomendação a justificação (o sinal do repositório ou do input que a motivou), práticas concretas e exemplos de ferramentas/abordagens.
         Guarda o diagnóstico.
     Alternativos:
         A1. Resposta fora do formato esperado → novo pedido automático (limite de tentativas).
         A2. Timeout ou erro do serviço → aciona UC29.
         A3. Fase sem oportunidades relevantes → indica "sem recomendação prioritária" com justificação.
-
-
-UC14: Priorizar oportunidades de IA
-    Fluxo principal: Cada recomendação recebe impacto esperado, esforço de adoção e prioridade (ex.: alta/média/baixa), e o sistema apresenta os "quick wins".
-
-
-UC15: Justificar recomendações
-    Fluxo principal: Cada recomendação inclui o raciocínio (o sinal do repositório ou do input que a motivou), práticas concretas e exemplos de ferramentas/abordagens.
+    Pós-condição: Diagnóstico estruturado pronto para o relatório.
 
 
 UC16: Regenerar diagnóstico
@@ -213,6 +180,7 @@ UC24: Gerir templates de prompts
 
 
 UC25: Versionar prompts e resultados
+    Ator: Avaliador
     Fluxo principal: Cada alteração gera uma versão, associada aos diagnósticos produzidos, permitindo comparação antes/depois.
 
 
@@ -221,10 +189,12 @@ UC26: Avaliar qualidade de um diagnóstico
 
 
 UC27: Consultar histórico de avaliações
+    Ator: Avaliador
     Fluxo principal: Utilizador vê a lista de avaliações anteriores, reabre relatórios e exporta novamente.
 
 
 UC28: Configurar integração com serviço de GenAI
+    Ator: Avaliador
     Fluxo principal: Define fornecedor, modelo, chave de API e parâmetros (temperatura, limites de tokens), e testa a ligação.
     Alternativo: Chave inválida → erro claro.
 
