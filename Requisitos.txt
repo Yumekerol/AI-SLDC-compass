@@ -1,0 +1,77 @@
+Requisitos: AI-SDLC Compass
+
+
+Prioridade segundo MoSCoW (Must / Should / Could).
+A coluna UC indica o caso de uso de onde vem o requisito (numeração do UseCases.txt). -> vai se atualizando com os casos de uso
+
+
+1. FUNCIONAIS
+ID	Requisito	UC	Prioridade
+RF01	O sistema permite ligar um repositório através de URL Git (público ou com token)	UC01	Must
+RF02	O sistema permite carregar um repositório como ficheiro ZIP	UC01	Must
+RF03	O sistema valida a elegibilidade: limite de ≈50 ficheiros, linguagens suportadas (Python, JavaScript, Java), ignorando ficheiros irrelevantes (node_modules, .git, binários, gerados)	UC02	Must
+RF04	Perante um repositório fora do âmbito, o sistema explica o motivo e oferece alternativas (subconjunto, continuar com aviso, cancelar)	UC21	Must
+RF05	O sistema deteta a stack tecnológica a partir dos ficheiros de dependências (frameworks, bibliotecas, build)	UC02	Must
+RF06	O sistema deteta a presença de testes, CI/CD, Docker e documentação	UC02	Must
+RF07	O sistema calcula métricas de estrutura e complexidade (nº de ficheiros, LOC, módulos, complexidade aproximada)	UC02	Should
+RF08	O sistema consolida os sinais do repositório num formato estruturado (JSON)	UC02	Must
+RF09	O utilizador pode ver os sinais extraídos e corrigi-los ou completá-los	UC06	Should
+RF10	O utilizador declara a metodologia de entrega (Scrum, Kanban, Waterfall, outra)	UC07	Must
+RF11	O utilizador declara a dimensão da equipa	UC08	Must
+RF12	O utilizador declara os pain points do SDLC (seleção por fase + texto livre)	UC09	Must
+RF13	O utilizador declara o nível de maturidade em IA e as ferramentas já usadas	UC10	Must
+RF14	O sistema valida os inputs, mostra um resumo para confirmação e permite guardar rascunho	UC11	Must (rascunho: Could)
+RF15	O sistema funde sinais e inputs num perfil contextual e assinala lacunas ou contradições	UC13	Must
+RF16	O sistema gera, através do serviço de GenAI, um diagnóstico para as 6 fases do SDLC	UC13	Must
+RF17	Cada recomendação inclui impacto esperado, esforço de adoção e prioridade, com destaque para "quick wins"	UC13	Must
+RF18	Cada recomendação inclui a justificação, ligada ao sinal ou input que a originou	UC13	Must
+RF19	O sistema valida o formato da resposta do GenAI e repete o pedido em caso de falha (limite de tentativas)	UC13	Must
+RF20	O sistema permite regenerar o diagnóstico, guardando a nova versão sem apagar a anterior	UC16	Should
+RF21	O sistema permite pré-visualizar o relatório antes de exportar	UC17	Should
+RF22	O sistema exporta o relatório em PDF	UC18	Must
+RF23	O PDF tem capa, sumário executivo, perfil do projeto e da equipa, secções por fase e recomendações	UC18	Must
+RF24	O PDF inclui a secção de âmbito e limitações e o caminho para escala enterprise	UC19	Must
+RF25	O utilizador pode consultar as limitações e o roadmap enterprise na aplicação	UC20	Could
+RF26	O sistema informa que dados vão para o GenAI, pede consentimento e elimina o código temporário após o scan	UC30	Must
+RF27	O avaliador configura o serviço de GenAI (fornecedor, modelo, chave, parâmetros) e testa a ligação	UC28	Must
+RF28	O avaliador executa o pipeline completo para várias combinações de repositório e perfil, guardando metadados (versão do prompt, modelo, data)	UC22	Must
+RF29	O avaliador compara várias execuções do mesmo input para medir a consistência	UC23	Should
+RF30	O avaliador gere templates de prompts e de relatório, com versionamento associado aos diagnósticos	UC24, UC25	Should
+RF31	O avaliador classifica cada diagnóstico segundo critérios definidos (relevância, especificidade, coerência, acionabilidade, ausência de alucinações)	UC26	Should
+RF32	O avaliador consulta o histórico de avaliações e reabre relatórios anteriores	UC27	Could
+
+
+A decidir:
+    RF-A: O sistema faz perguntas dinâmicas ao utilizador com base nas lacunas encontradas (substitui ou complementa RF10 a RF13).
+    RF-B: O sistema disponibiliza um chatbot de aconselhamento com o contexto do diagnóstico carregado.
+
+
+
+2. NÃO FUNCIONAIS
+ID	Categoria	Requisito
+RNF01	Âmbito	O PoC suporta repositórios até ≈50 ficheiros e apenas Python, JavaScript e Java
+RNF02	Âmbito	Os inputs da equipa são auto-declarados, sem integração com ferramentas de gestão de projeto
+RNF03	Desempenho	O scan de um repositório de ≈50 ficheiros termina em menos de 1 minuto (valor a validar)
+RNF04	Desempenho	A geração do diagnóstico termina em menos de 3 minutos (valor a validar)
+RNF05	Fiabilidade	Perante falhas (GenAI indisponível, quota, resposta mal formatada, rede, geração do PDF), o sistema mostra mensagem clara, faz retentativas controladas e preserva os dados já introduzidos
+RNF06	Segurança e privacidade	O código é guardado apenas numa área temporária e eliminado após o scan
+RNF07	Segurança e privacidade	Não é enviado código completo ao GenAI, apenas sinais ou excertos, quando aplicável
+RNF08	Segurança e privacidade	Chaves de API e tokens de repositório não são guardados no código nem persistidos em claro
+RNF09	Usabilidade	Um Delivery Manager sem formação técnica profunda consegue preencher o formulário e obter o relatório sem apoio
+RNF10	Qualidade do output	O diagnóstico segue sempre a mesma estrutura (6 fases, campos fixos), validada automaticamente
+RNF11	Qualidade do output	Cada recomendação é rastreável a um sinal ou input (sem recomendações sem justificação)
+RNF12	Qualidade do output	O PDF tem aspeto profissional e pode ser usado diretamente numa reunião com cliente
+RNF13	Rastreabilidade	Cada diagnóstico guarda a versão do prompt, o modelo e a data de geração
+RNF14	Manutenibilidade	Os prompts e o template do relatório ficam em ficheiros próprios, fora do código
+RNF15	Extensibilidade	Adicionar uma linguagem ao scanner ou trocar o fornecedor de GenAI não obriga a reescrever o resto do sistema
+RNF16	Custo	O sistema limita tokens e custo por diagnóstico
+RNF17	Documentação	As limitações do PoC e o caminho para enterprise ficam documentados no sistema e na documentação técnica
+
+
+
+3. PERGUNTAS IMPORTANTES
+    Idioma do relatório: inglês ou português?
+    Tempos aceitáveis: os valores de RNF03 e RNF04 são realistas?
+    Privacidade: podemos enviar excertos de código ao GenAI, ou só sinais agregados? (RF26, RNF07)
+    Interface: aplicação web, CLI ou outra?
+    Agentes e chatbot: querem RF-A e RF-B, ou só formulário + scan + relatório?
